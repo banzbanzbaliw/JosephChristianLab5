@@ -1,0 +1,446 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans, 'Inter', sans-serif); }
+  #app { display: flex; min-height: 620px; background: #0a0f1e; color: #f1f5f9; font-size: 13px; border-radius: 12px; overflow: hidden; }
+  aside { width: 200px; min-height: 620px; background: #0f172a; display: flex; flex-direction: column; border-right: 1px solid #1e293b; flex-shrink: 0; }
+  .logo-area { padding: 18px 18px 16px; border-bottom: 1px solid #1e293b; }
+  .logo-name { font-size: 18px; color: #f1f5f9; font-weight: 400; font-family: Georgia, serif; letter-spacing: -0.5px; }
+  .logo-sub { font-size: 10px; color: #64748b; margin-top: 2px; font-family: monospace; letter-spacing: 0.5px; }
+  nav { padding: 12px 8px; flex: 1; }
+  .nav-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: none; border-radius: 7px; background: transparent; color: #94a3b8; cursor: pointer; font-size: 13px; font-family: inherit; margin-bottom: 2px; transition: all 0.15s; text-align: left; }
+  .nav-btn:hover { background: #1a2540; color: #cbd5e1; }
+  .nav-btn.active { background: #1e3a5f; color: #60a5fa; font-weight: 500; }
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: #60a5fa; margin-left: auto; }
+  .sidebar-foot { padding: 14px 18px; border-top: 1px solid #1e293b; }
+  .sidebar-foot .who { font-size: 11px; color: #475569; }
+  .sidebar-foot .role { font-size: 12px; color: #94a3b8; font-weight: 500; }
+  main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; background: #0f172a; border-bottom: 1px solid #1e293b; }
+  .header-title { font-size: 18px; color: #f1f5f9; font-weight: 400; font-family: Georgia, serif; }
+  .header-sub { font-size: 11px; color: #475569; margin-top: 1px; }
+  .search-wrap { position: relative; }
+  .search-wrap i { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 15px; }
+  .search-input { background: #1e293b; border: 1px solid #334155; border-radius: 7px; padding: 7px 10px 7px 28px; color: #f1f5f9; font-size: 12px; outline: none; width: 190px; font-family: inherit; }
+  .search-input::placeholder { color: #475569; }
+  .notif-btn { background: #1e293b; border: 1px solid #334155; border-radius: 7px; padding: 7px 10px; color: #94a3b8; cursor: pointer; font-size: 14px; margin-left: 8px; }
+  .content { flex: 1; padding: 20px 22px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+  .stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+  .stat-val { font-size: 26px; font-weight: 700; color: #f1f5f9; line-height: 1; margin-bottom: 4px; }
+  .stat-delta { font-size: 11px; font-weight: 500; }
+  .dash-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px; }
+  .panel-title { font-size: 12px; color: #94a3b8; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .recent-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #0f172a; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #60a5fa; font-weight: 700; flex-shrink: 0; }
+  .rname { font-size: 12px; color: #f1f5f9; font-weight: 500; }
+  .rid { font-size: 10px; color: #475569; }
+  .badge { border-radius: 5px; padding: 2px 8px; font-size: 10px; font-weight: 600; }
+  .b-enrolled { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .b-irregular { background: #422006; color: #fbbf24; border: 1px solid #92400e; }
+  .b-loa { background: #2d1111; color: #f87171; border: 1px solid #7f1d1d; }
+  .bar-row { margin-bottom: 14px; }
+  .bar-meta { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+  .bar-track { height: 5px; background: #0f172a; border-radius: 99px; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .toolbar-info { font-size: 12px; color: #475569; }
+  .btn { border-radius: 7px; padding: 7px 14px; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: 500; border: 1px solid; }
+  .btn-outline { background: #1e293b; border-color: #334155; color: #94a3b8; }
+  .btn-primary { background: #1d4ed8; border-color: transparent; color: #fff; }
+  .btn-group { display: flex; gap: 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  .table-wrap { background: #1e293b; border: 1px solid #334155; border-radius: 10px; overflow: hidden; }
+  thead tr { background: #0f172a; }
+  th { padding: 10px 14px; text-align: left; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  td { padding: 10px 14px; vertical-align: middle; border-top: 1px solid #0f172a; }
+  tr.odd-row { background: #172033; }
+  tr.selected-row { background: #1e3a5f !important; }
+  .sid { font-family: monospace; color: #60a5fa; font-size: 11px; }
+  .sname { color: #f1f5f9; font-weight: 500; }
+  .smuted { color: #94a3b8; }
+  .icon-btn { background: #0f172a; border: 1px solid #1e293b; border-radius: 5px; padding: 3px 7px; cursor: pointer; font-size: 12px; color: #94a3b8; margin-right: 3px; }
+  .empty-state { padding: 40px; text-align: center; color: #475569; }
+  .empty-icon { font-size: 28px; margin-bottom: 8px; }
+  .form-wrap { max-width: 600px; margin: 0 auto; }
+  .form-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 24px; }
+  .form-title { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+  .form-sub { font-size: 12px; color: #475569; margin-bottom: 20px; }
+  .section-label { font-size: 11px; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 12px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .field label { display: block; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .field input, .field select { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 7px; padding: 8px 10px; color: #f1f5f9; font-size: 12px; outline: none; font-family: inherit; }
+  .field input::placeholder { color: #475569; }
+  .radio-row { display: flex; gap: 16px; align-items: center; }
+  .radio-row label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #64748b; font-size: 12px; }
+  .radio-row input[type=radio]:checked + span { color: #60a5fa; }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .success-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 40px; text-align: center; max-width: 400px; margin: 30px auto; }
+  .success-icon { font-size: 40px; margin-bottom: 12px; }
+  .success-title { font-size: 18px; color: #4ade80; font-weight: 700; margin-bottom: 8px; }
+  .success-desc { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+  .placeholder-page { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 10px; }
+  .ph-icon { font-size: 40px; }
+  .ph-title { font-size: 18px; color: #f1f5f9; font-weight: 700; }
+  .ph-desc { font-size: 13px; color: #475569; }
+  .ph-tag { background: #1e293b; border: 1px solid #334155; border-radius: 7px; padding: 6px 16px; font-size: 11px; color: #60a5fa; margin-top: 6px; }
+</style>
+
+<div id="app">
+  <aside>
+    <div class="logo-area">
+      <div class="logo-name">Akademya</div>
+      <div class="logo-sub">STUDENT MANAGEMENT</div>
+    </div>
+    <nav>
+      <button class="nav-btn active" onclick="navigate('dashboard',this)">
+        <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+        <span class="nav-dot"></span>
+      </button>
+      <button class="nav-btn" onclick="navigate('students',this)">
+        <i class="ti ti-users" aria-hidden="true"></i> Students
+      </button>
+      <button class="nav-btn" onclick="navigate('enroll',this)">
+        <i class="ti ti-clipboard-list" aria-hidden="true"></i> Enrollment
+      </button>
+      <button class="nav-btn" onclick="navigate('grades',this)">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i> Grades
+      </button>
+      <button class="nav-btn" onclick="navigate('reports',this)">
+        <i class="ti ti-file-analytics" aria-hidden="true"></i> Reports
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="who">Logged in as</div>
+      <div class="role">Admin · Registrar</div>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <div class="header-title" id="page-title">Dashboard Overview</div>
+        <div class="header-sub">A.Y. 2024–2025 · Second Semester</div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <div class="search-wrap">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input class="search-input" id="search-input" placeholder="Search students…" oninput="filterStudents(this.value)">
+        </div>
+        <button class="notif-btn" onclick="alert('No new notifications.')">
+          <i class="ti ti-bell" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Students <i class="ti ti-users" aria-hidden="true"></i></div>
+            <div class="stat-val">1,248</div>
+            <div class="stat-delta" style="color:#4ade80">+34 this sem</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Enrolled <i class="ti ti-check" aria-hidden="true"></i></div>
+            <div class="stat-val">1,105</div>
+            <div class="stat-delta" style="color:#60a5fa">88.5%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Irregular <i class="ti ti-alert-triangle" aria-hidden="true"></i></div>
+            <div class="stat-val">98</div>
+            <div class="stat-delta" style="color:#fbbf24">7.8%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">On Leave <i class="ti ti-moon" aria-hidden="true"></i></div>
+            <div class="stat-val">45</div>
+            <div class="stat-delta" style="color:#f87171">3.6%</div>
+          </div>
+        </div>
+        <div class="dash-split">
+          <div class="panel">
+            <div class="panel-title">Recent Students</div>
+            <div class="recent-row">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar">J</div>
+                <div><div class="rname">Joseph Banate</div><div class="rid">2024-0001 · BSCS</div></div>
+              </div>
+              <span class="badge b-enrolled">Enrolled</span>
+            </div>
+            <div class="recent-row">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar">N</div>
+                <div><div class="rname">Naruto Uzumaki</div><div class="rid">2024-0002 · BSIT</div></div>
+              </div>
+              <span class="badge b-enrolled">Enrolled</span>
+            </div>
+            <div class="recent-row">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar">S</div>
+                <div><div class="rname">Sasuke Uchiha</div><div class="rid">2024-0003 · BSCS</div></div>
+              </div>
+              <span class="badge b-irregular">Irregular</span>
+            </div>
+            <div class="recent-row" style="border-bottom:none">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar">L</div>
+                <div><div class="rname">Lady Arkham</div><div class="rid">2024-0004 · BSIS</div></div>
+              </div>
+              <span class="badge b-enrolled">Enrolled</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">Course Distribution</div>
+            <div class="bar-row">
+              <div class="bar-meta"><span style="color:#94a3b8">BSCS</span><span style="color:#64748b">524 · 42%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:42%;background:#60a5fa"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta"><span style="color:#94a3b8">BSIT</span><span style="color:#64748b">412 · 33%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:33%;background:#4ade80"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-meta"><span style="color:#94a3b8">BSIS</span><span style="color:#64748b">312 · 25%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:25%;background:#fbbf24"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="page" id="page-students">
+        <div class="toolbar">
+          <div class="toolbar-info" id="table-count">5 of 5 records</div>
+          <div class="btn-group">
+            <button class="btn btn-outline" onclick="alert('Export CSV — coming in final version')">
+              <i class="ti ti-download" aria-hidden="true"></i> Export CSV
+            </button>
+            <button class="btn btn-primary" onclick="navigate('enroll', document.querySelector('[onclick*=enroll]'))">
+              <i class="ti ti-plus" aria-hidden="true"></i> Add Student
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div id="empty-state" class="empty-state" style="display:none">
+            <div class="empty-icon"><i class="ti ti-search-off" aria-hidden="true"></i></div>
+            <div id="empty-msg">No students found</div>
+          </div>
+          <table id="students-table">
+            <thead>
+              <tr>
+                <th onclick="sortTable('id')">Student ID <i class="ti ti-arrows-sort" aria-hidden="true"></i></th>
+                <th onclick="sortTable('name')">Name <i class="ti ti-arrows-sort" aria-hidden="true"></i></th>
+                <th>Course</th>
+                <th>Year</th>
+                <th>Status</th>
+                <th>GPA</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ENROLL -->
+      <div class="page" id="page-enroll">
+        <div class="form-wrap">
+          <div id="enroll-form-view">
+            <div class="form-card">
+              <div class="form-title">New Student Enrollment</div>
+              <div class="form-sub">Fill in all required fields marked with *</div>
+              <div class="section-label">Personal Information</div>
+              <div class="form-grid-2">
+                <div class="field"><label>Last Name *</label><input id="f-last" placeholder="e.g. Santos"></div>
+                <div class="field"><label>First Name *</label><input id="f-first" placeholder="e.g. Maria"></div>
+                <div class="field"><label>Middle Name</label><input id="f-mid" placeholder="Optional"></div>
+                <div class="field"><label>Email</label><input id="f-email" type="email" placeholder="email@cavsu.com.edu"></div>
+              </div>
+              <div class="section-label">Academic Information</div>
+              <div class="form-grid-3">
+                <div class="field"><label>Course *</label>
+                  <select id="f-course"><option value="">— Select —</option><option>BSCS</option><option>BSIT</option><option>BSIS</option></select>
+                </div>
+                <div class="field"><label>Year Level *</label>
+                  <select id="f-year"><option value="">— Select —</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+                </div>
+                <div class="field"><label>Section</label>
+                  <select id="f-sec"><option value="">— Select —</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+                </div>
+              </div>
+              <div class="section-label">Enrollment Type</div>
+              <div class="radio-row" style="margin-bottom:18px">
+                <label><input type="radio" name="etype" value="Regular" checked><span>Regular</span></label>
+                <label><input type="radio" name="etype" value="Irregular"><span>Irregular</span></label>
+                <label><input type="radio" name="etype" value="Transferee"><span>Transferee</span></label>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
+                <button class="btn btn-primary" onclick="submitForm()">Submit Enrollment</button>
+              </div>
+            </div>
+          </div>
+          <div id="enroll-success-view" style="display:none">
+            <div class="success-card">
+              <div class="success-icon"><i class="ti ti-circle-check" style="color:#4ade80;font-size:40px" aria-hidden="true"></i></div>
+              <div class="success-title">Enrollment Submitted!</div>
+              <div class="success-desc" id="success-msg">Student has been queued for validation.</div>
+              <button class="btn btn-primary" onclick="resetForm()">Enroll Another Student</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRADES -->
+      <div class="page" id="page-grades">
+        <div class="placeholder-page">
+          <div class="ph-icon"><i class="ti ti-chart-bar" style="color:#60a5fa;font-size:40px" aria-hidden="true"></i></div>
+          <div class="ph-title">Grade Management</div>
+          <div class="ph-desc">View, encode, and manage student grades.</div>
+          <div class="ph-tag">This section will be built in the final system</div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="placeholder-page">
+          <div class="ph-icon"><i class="ti ti-file-analytics" style="color:#60a5fa;font-size:40px" aria-hidden="true"></i></div>
+          <div class="ph-title">Reports & Analytics</div>
+          <div class="ph-desc">Generate enrollment and performance reports.</div>
+          <div class="ph-tag">This section will be built in the final system</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const STUDENTS = [
+  { id:"2024-0001", first:"Joseph",  last:"Banate",  course:"BSCS", year:"3rd", status:"Enrolled",  gpa:"1.75", email:"josephchristian.banate@cavsu.com.edu" },
+  { id:"2024-0002", first:"Naruto",  last:"Uzumaki", course:"BSIT", year:"2nd", status:"Enrolled",  gpa:"2.00", email:"uzumaki.naruto@cavsu.com.edu" },
+  { id:"2024-0003", first:"Sasuke",  last:"Uchiha",  course:"BSCS", year:"4th", status:"Irregular", gpa:"2.25", email:"uchiha.sasuke@cavsu.com.edu" },
+  { id:"2024-0004", first:"Lady",    last:"Arkham",  course:"BSIS", year:"1st", status:"Enrolled",  gpa:"1.50", email:"Arkham.Lady@cavsu.com.edu" },
+  { id:"2024-0005", first:"Rabbit",  last:"White",   course:"BSIT", year:"3rd", status:"LOA",       gpa:null,   email:"white.rabbit@cavsu.com.edu" },
+];
+
+const TITLES = { dashboard:"Dashboard Overview", students:"Student Records", enroll:"Enrollment Form", grades:"Grade Management", reports:"Reports & Analytics" };
+let currentPage = "dashboard";
+let currentSearch = "";
+let selectedId = null;
+let sortCol = "id";
+let sortDir = "asc";
+
+function navigate(id, btn) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-"+id).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".nav-btn .nav-dot").forEach(d => d.remove());
+  if (btn) {
+    btn.classList.add("active");
+    const dot = document.createElement("span");
+    dot.className = "nav-dot";
+    btn.appendChild(dot);
+  }
+  document.getElementById("page-title").textContent = TITLES[id] || "";
+  currentPage = id;
+  if (id === "students") renderTable(currentSearch);
+}
+
+function badgeHtml(status) {
+  const cls = status === "Enrolled" ? "b-enrolled" : status === "Irregular" ? "b-irregular" : "b-loa";
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function renderTable(search) {
+  const q = (search||"").toLowerCase();
+  let rows = STUDENTS.filter(s =>
+    s.first.toLowerCase().includes(q) || s.last.toLowerCase().includes(q) ||
+    s.id.includes(q) || s.course.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
+  );
+  rows.sort((a,b) => {
+    let va = sortCol==="name" ? a.last+a.first : (a[sortCol]||"");
+    let vb = sortCol==="name" ? b.last+b.first : (b[sortCol]||"");
+    return sortDir==="asc" ? (va>vb?1:-1) : (va<vb?1:-1);
+  });
+  const tbody = document.getElementById("students-body");
+  const empty = document.getElementById("empty-state");
+  const table = document.getElementById("students-table");
+  const countEl = document.getElementById("table-count");
+  countEl.textContent = rows.length + " of " + STUDENTS.length + " records" + (q ? ` matching "${search}"` : "");
+  if (rows.length === 0) {
+    empty.style.display = "block";
+    table.style.display = "none";
+    document.getElementById("empty-msg").textContent = `No students found for "${search}"`;
+    return;
+  }
+  empty.style.display = "none";
+  table.style.display = "";
+  tbody.innerHTML = rows.map((s,i) => `
+    <tr class="${selectedId===s.id?"selected-row":i%2===1?"odd-row":""}" onclick="selectRow('${s.id}')">
+      <td><span class="sid">${s.id}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar">${s.first.charAt(0)}</div>
+          <div>
+            <div class="sname">${s.first} ${s.last}</div>
+            <div style="font-size:10px;color:#475569">${s.email}</div>
+          </div>
+        </div>
+      </td>
+      <td class="smuted">${s.course}</td>
+      <td class="smuted">Year ${s.year}</td>
+      <td>${badgeHtml(s.status)}</td>
+      <td style="color:${s.gpa?"#4ade80":"#475569"};font-weight:600">${s.gpa||"—"}</td>
+      <td>
+        <button class="icon-btn" onclick="event.stopPropagation();alert('View: ${s.first} ${s.last}')"><i class="ti ti-eye" aria-hidden="true"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();alert('Edit: ${s.first} ${s.last}')"><i class="ti ti-edit" aria-hidden="true"></i></button>
+        <button class="icon-btn" style="color:#f87171" onclick="event.stopPropagation();alert('Delete ${s.first} ${s.last}?')"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </td>
+    </tr>`).join("");
+}
+
+function selectRow(id) { selectedId = selectedId===id?null:id; renderTable(currentSearch); }
+
+function sortTable(col) {
+  if (sortCol===col) sortDir = sortDir==="asc"?"desc":"asc";
+  else { sortCol=col; sortDir="asc"; }
+  renderTable(currentSearch);
+}
+
+function filterStudents(val) {
+  currentSearch = val;
+  if (currentPage==="students") renderTable(val);
+}
+
+function clearForm() {
+  ["f-last","f-first","f-mid","f-email"].forEach(id => document.getElementById(id).value="");
+  ["f-course","f-year","f-sec"].forEach(id => document.getElementById(id).value="");
+  document.querySelector('input[name=etype][value=Regular]').checked=true;
+}
+
+function submitForm() {
+  const last = document.getElementById("f-last").value.trim();
+  const first = document.getElementById("f-first").value.trim();
+  const course = document.getElementById("f-course").value;
+  if (!last || !first || !course) { alert("Please fill in: Last Name, First Name, and Course."); return; }
+  document.getElementById("success-msg").textContent = `${first} ${last} has been queued for enrollment validation.`;
+  document.getElementById("enroll-form-view").style.display="none";
+  document.getElementById("enroll-success-view").style.display="block";
+}
+
+function resetForm() {
+  clearForm();
+  document.getElementById("enroll-form-view").style.display="block";
+  document.getElementById("enroll-success-view").style.display="none";
+}
+
+renderTable("");
+</script>
